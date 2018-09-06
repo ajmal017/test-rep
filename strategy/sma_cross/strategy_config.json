@@ -1,0 +1,1 @@
+{"exchange": "bitfinex", "symbol": "BTCUSD", "timeframe": 1440, "signal_type": "sma_cross", "fast_ma_length": 5, "slow_ma_length": 30, "backtest_start_date": {"year": 2014, "month": 1, "day": 1}, "backtest_end_date": {"year": 2014, "month": 12, "day": 31}, "id": "sma_cross_5_30__bitfinex__BTCUSD__1440__20140101_20141231"}
