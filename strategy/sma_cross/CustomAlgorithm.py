@@ -26,7 +26,7 @@ from QuantConnect.Algorithm import *
 # from QuantConnect.Algorithm.Framework.Risk import *
 # # from QuantConnect.Algorithm.Framework.Risk.MaximumDrawdownPercentPerSecurity import MaximumDrawdownPercentPerSecurity
 
-
+import os
 import numpy as np
 # from Deciam import decimal as d
 from datetime import datetime, timedelta
@@ -52,8 +52,8 @@ class BasicTemplateAlgorithm(QCAlgorithm):
 
     def Initialize(self):
         '''Initialise the data and resolution required, as well as the cash and start-end dates for your algorithm. All algorithms must initialized.'''
-
-        f = open("strategy_config.json", "r")
+        
+        f = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "strategy_config.json"), "r")
         strategy_config = json.load(f)
         self.SetBenchmark(strategy_config['symbol'])
 
