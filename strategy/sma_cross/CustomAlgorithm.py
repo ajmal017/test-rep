@@ -43,29 +43,27 @@ class CustomFeeModel:
         # self.algorithm.Log("CustomFeeModel: " + str(fee))
         return fee
 
-import json
 
+import json
 
 
 class BasicTemplateAlgorithm(QCAlgorithm):
     '''Basic template algorithm simply initializes the date range and cash'''
-
     def Initialize(self):
         '''Initialise the data and resolution required, as well as the cash and start-end dates for your algorithm. All algorithms must initialized.'''
-        
-        f = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "strategy_config.json"), "r")
-        strategy_config = json.load(f)
-        self.SetBenchmark(strategy_config['symbol'])
+
+        with open(os.environ["_STRATEGY_CONFIG"]) as f:
+            strategy_config = json.load(f)
+
+        symbol = strategy_config["base"] + strategy_config["quote"]
+        self._symbol = symbol
+        self.SetBenchmark(symbol)
 
         self.SetStartDate(
-            strategy_config['backtest_start_date']['year'],
-            strategy_config['backtest_start_date']['month'],
-            strategy_config['backtest_start_date']['day']
+            *strategy_config["date_range"][0].split("-")
         )  # Set Start Date
         self.SetEndDate(
-            strategy_config['backtest_end_date']['year'],
-            strategy_config['backtest_end_date']['month'],
-            strategy_config['backtest_end_date']['day']
+            *strategy_config["date_range"][1].split("-")
         )  # Set End Date
 
         self.SetCash(10000)  # Set Strategy Cash
@@ -75,7 +73,7 @@ class BasicTemplateAlgorithm(QCAlgorithm):
         self.SetBrokerageModel(BrokerageName.GDAX, AccountType.Cash)
 
         self.security = self.AddSecurity(
-            SecurityType.Crypto, strategy_config['symbol'], res, Market.GDAX, False, 1, True
+            SecurityType.Crypto, symbol, res, Market.GDAX, False, 1, True
         )
         self.security.SetFeeModel(CustomFeeModel(self))
 
@@ -85,21 +83,21 @@ class BasicTemplateAlgorithm(QCAlgorithm):
 
         self.symbol = self.security.Symbol
 
-        if int(strategy_config['slow_ma_length']) <= int(strategy_config['fast_ma_length']):
+        if int(strategy_config["strategy_config"]['slow_length']) <= int(strategy_config["strategy_config"]['fast_length']):
             raise Exception("Slow MA can't be less the Fast MA")
 
-        self.ma_slow_len = int(strategy_config['slow_ma_length'])
-        self.ma_fast_len = int(strategy_config['fast_ma_length'])
+        self.ma_slow_len = int(strategy_config["strategy_config"]['slow_length'])
+        self.ma_fast_len = int(strategy_config["strategy_config"]['fast_length'])
 
         self.ma_slow = RollingWindow[float](self.ma_slow_len)
         self.ma_fast = RollingWindow[float](self.ma_fast_len)
 
         self.is_long_position = None
 
+
         dataConsolidator = TradeBarConsolidator(timedelta(minutes=int(strategy_config['timeframe'])))
         dataConsolidator.DataConsolidated += self.dataConsolidatorHandler
-        self.SubscriptionManager.AddConsolidator(strategy_config['symbol'], dataConsolidator)
-
+        self.SubscriptionManager.AddConsolidator(symbol, dataConsolidator)
 
     def dataConsolidatorHandler(self, sender, bar):
         '''This is our event handler for our 30-minute trade bar defined above in Initialize(). So each time the consolidator produces a new 30-minute bar, this function will be called automatically. The sender parameter will be the instance of the IDataConsolidator that invoked the event '''
@@ -130,10 +128,10 @@ class BasicTemplateAlgorithm(QCAlgorithm):
 
         if self.is_long_position:
             # self.Order("BTCUSD", 1)
-            self.SetHoldings("BTCUSD", 1)
+            self.SetHoldings(self._symbol, 1)
         else:
             # self.Order("BTCUSD", -1)
-            self.SetHoldings("BTCUSD", -1)
+            self.SetHoldings(self._symbol, -1)
 
     def OnData(self, data):
         pass
