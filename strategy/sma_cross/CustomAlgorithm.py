@@ -60,10 +60,10 @@ class BasicTemplateAlgorithm(QCAlgorithm):
         self.SetBenchmark(symbol)
 
         self.SetStartDate(
-            *strategy_config["date_range"][0].split("-")
+            *tuple(map(int, strategy_config["date_range"][0].split("-")))
         )  # Set Start Date
         self.SetEndDate(
-            *strategy_config["date_range"][1].split("-")
+            *tuple(map(int, strategy_config["date_range"][1].split("-")))
         )  # Set End Date
 
         self.SetCash(10000)  # Set Strategy Cash
