@@ -32,6 +32,8 @@ import numpy as np
 from datetime import datetime, timedelta
 import decimal as d
 
+from custom_ohlc import CustomOHLC
+
 
 class CustomFeeModel:
     def __init__(self, algorithm):
@@ -55,15 +57,15 @@ class BasicTemplateAlgorithm(QCAlgorithm):
         with open(os.environ["_STRATEGY_CONFIG"]) as f:
             strategy_config = json.load(f)
 
-        symbol = strategy_config["base"] + strategy_config["quote"]
+        symbol = strategy_config["asset_config"]["base"] + strategy_config["asset_config"]["quote"]
         self._symbol = symbol
         self.SetBenchmark(symbol)
 
         self.SetStartDate(
-            *tuple(map(int, strategy_config["date_range"][0].split("-")))
+            *tuple(map(int, strategy_config["asset_config"]["date_range"][0].split("-")))
         )  # Set Start Date
         self.SetEndDate(
-            *tuple(map(int, strategy_config["date_range"][1].split("-")))
+            *tuple(map(int, strategy_config["asset_config"]["date_range"][1].split("-")))
         )  # Set End Date
 
         self.SetCash(10000)  # Set Strategy Cash
@@ -83,7 +85,7 @@ class BasicTemplateAlgorithm(QCAlgorithm):
 
         self.symbol = self.security.Symbol
 
-        if int(strategy_config["strategy_config"]['slow_length']) <= int(strategy_config["strategy_config"]['fast_length']):
+        if int(strategy_config["asset_config"]["strategy_config"]['slow_length']) <= int(strategy_config["asset_config"]["strategy_config"]['fast_length']):
             raise Exception("Slow MA can't be less the Fast MA")
 
         self.ma_slow_len = int(strategy_config["strategy_config"]['slow_length'])
@@ -95,9 +97,12 @@ class BasicTemplateAlgorithm(QCAlgorithm):
         self.is_long_position = None
 
 
-        dataConsolidator = TradeBarConsolidator(timedelta(minutes=int(strategy_config['timeframe'])))
+        dataConsolidator = TradeBarConsolidator(timedelta(minutes=int(strategy_config["strategy_config"]['timeframe'])))
         dataConsolidator.DataConsolidated += self.dataConsolidatorHandler
         self.SubscriptionManager.AddConsolidator(symbol, dataConsolidator)
+
+        sym = strategy_config["asset_config"]["base"] + "_" + strategy_config["asset_config"]["quote"]
+        self.AddData(CustomOHLC, sym, Resolution.Daily)
 
     def dataConsolidatorHandler(self, sender, bar):
         '''This is our event handler for our 30-minute trade bar defined above in Initialize(). So each time the consolidator produces a new 30-minute bar, this function will be called automatically. The sender parameter will be the instance of the IDataConsolidator that invoked the event '''
