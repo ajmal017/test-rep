@@ -85,7 +85,7 @@ class BasicTemplateAlgorithm(QCAlgorithm):
 
         self.symbol = self.security.Symbol
 
-        if int(strategy_config["asset_config"]["strategy_config"]['slow_length']) <= int(strategy_config["asset_config"]["strategy_config"]['fast_length']):
+        if int(strategy_config["strategy_config"]['slow_length']) <= int(strategy_config["strategy_config"]['fast_length']):
             raise Exception("Slow MA can't be less the Fast MA")
 
         self.ma_slow_len = int(strategy_config["strategy_config"]['slow_length'])
