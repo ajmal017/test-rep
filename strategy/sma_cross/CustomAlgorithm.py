@@ -70,7 +70,7 @@ class BasicTemplateAlgorithm(QCAlgorithm):
 
         self.SetCash(10000)  # Set Strategy Cash
 
-        res = Resolution.Hour
+        res = Resolution.Daily
 
         self.SetBrokerageModel(BrokerageName.GDAX, AccountType.Cash)
 
