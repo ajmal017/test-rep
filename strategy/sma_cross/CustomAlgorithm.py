@@ -70,7 +70,7 @@ class BasicTemplateAlgorithm(QCAlgorithm):
 
         self.SetCash(10000)  # Set Strategy Cash
 
-        res = Resolution.Daily
+        res = Resolution.Hour
 
         self.SetBrokerageModel(BrokerageName.GDAX, AccountType.Cash)
 
@@ -102,7 +102,7 @@ class BasicTemplateAlgorithm(QCAlgorithm):
         self.SubscriptionManager.AddConsolidator(symbol, dataConsolidator)
 
         sym = strategy_config["asset_config"]["base"] + "_" + strategy_config["asset_config"]["quote"]
-        self.AddData(CustomOHLC, sym, Resolution.Daily)
+        self.AddData(CustomOHLC, sym, res)
 
     def dataConsolidatorHandler(self, sender, bar):
         '''This is our event handler for our 30-minute trade bar defined above in Initialize(). So each time the consolidator produces a new 30-minute bar, this function will be called automatically. The sender parameter will be the instance of the IDataConsolidator that invoked the event '''
