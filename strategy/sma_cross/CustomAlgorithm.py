@@ -69,8 +69,18 @@ class BasicTemplateAlgorithm(QCAlgorithm):
         )  # Set End Date
 
         self.SetCash(10000)  # Set Strategy Cash
-
+        
         res = Resolution.Daily
+        price_timeframe = strategy_config["asset_config"]["timeframe"]
+        
+        if price_timeframe == "1m":
+            res = Resolution.Minute
+        elif price_timeframe == "1h":
+            res = Resolution.Hour
+        elif price_timeframe == "1D":
+            res = Resolution.Daily
+        
+        
 
         self.SetBrokerageModel(BrokerageName.GDAX, AccountType.Cash)
 
